@@ -1,20 +1,53 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+
 from django.db import models
-from .models import Category, Comment, Genre, Review, Title
+from reviews.models import (Category, Comment, Genre, Review, Title,
+                            User, GenreTitle)
+
+# from .models import Category, Comment, Genre, Review, Title
 
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 
 
-class CategoryAdmin(admin.ModelAdmin):
+class UserResource(resources.ModelResource):
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'role',
+            'bio',
+            'first_name',
+            'last_name',
+        )
+
+
+class UserAdmin(ImportExportModelAdmin,):
+    resource_classes = [UserResource]
     list_display = (
-        'name',
-        'slug',
+        'id',
+        'username',
+        'email',
+        'role',
+        'bio',
+        'first_name',
+        'last_name',
     )
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-пусто'
+    search_fields = (
+        'id',
+        'role',
+        'first_name',
+        'last_name',
+        'username',
+        'email'
+    )
+    list_filter = ('username',)
+    empty_value_display = '-пусто-'
 
 
 class CategoryResource(resources.ModelResource):
@@ -23,6 +56,18 @@ class CategoryResource(resources.ModelResource):
     class Meta:
         model = Category
         fields = ('id', 'name', 'slug')
+
+
+class CategoryAdmin(ImportExportModelAdmin):
+    resource_classes = [CategoryResource]
+    list_display = (
+        'id',
+        'name',
+        'slug',
+    )
+    search_fields = ('name',)
+    list_filter = ('name',)
+    empty_value_display = '-пусто-'
 
 
 class CommentResource(resources.ModelResource):
@@ -157,9 +202,11 @@ class GenreTitleAdmin(ImportExportModelAdmin):
     empty_value_display = '-пусто-'
 
 
+admin.site.unregister(Group)
+admin.site.register(User, UserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Title, TitleAdmin)
-admin.site.register(GenreTitleAdmin)
+admin.site.register(GenreTitle, GenreTitleAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)
